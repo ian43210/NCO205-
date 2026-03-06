@@ -6,26 +6,78 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 0;
       background: #f5f5f5;
     }
+    .app-header {
+      background: #0044aa;
+      color: #fff;
+      padding: 16px 24px;
+    }
+    .app-header h1 {
+      margin: 0 0 4px 0;
+      font-size: 22px;
+    }
+    .app-header p {
+      margin: 0;
+      font-size: 13px;
+      opacity: 0.9;
+    }
     .container {
-      max-width: 900px;
-      margin: 0 auto;
+      max-width: 1000px;
+      margin: 20px auto;
       background: #ffffff;
-      padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding-bottom: 16px;
     }
-    h1, h2 {
-      margin-top: 0;
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      background: #fafafa;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
     }
+    .tab-button {
+      flex: 1;
+      padding: 12px 16px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 14px;
+      border: none;
+      background: transparent;
+      outline: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .tab-button.active {
+      background: #ffffff;
+      border-bottom: 3px solid #0044aa;
+      color: #0044aa;
+      font-weight: bold;
+    }
+    .tab-button:not(.active):hover {
+      background: #f0f0f0;
+    }
+
+    .tab-content {
+      padding: 16px 20px 24px 20px;
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
     .section {
       border: 1px solid #ddd;
       padding: 12px;
       border-radius: 6px;
       margin-bottom: 16px;
       background: #fafafa;
+    }
+    h2 {
+      margin-top: 0;
     }
     label {
       display: block;
@@ -36,14 +88,14 @@
       padding: 6px;
       font-size: 14px;
     }
-    button {
+    button.primary {
       cursor: pointer;
       background: #0066ff;
       color: #fff;
       border: none;
       border-radius: 4px;
     }
-    button:disabled {
+    button.primary:disabled {
       background: #cccccc;
       cursor: not-allowed;
     }
@@ -52,6 +104,7 @@
       padding: 8px;
       border-radius: 4px;
       background: #e8f4ff;
+      font-size: 13px;
     }
     .booking-card {
       border: 1px solid #ccc;
@@ -72,109 +125,169 @@
       font-size: 13px;
       color: #555;
     }
+    ul {
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
+  <header class="app-header">
+    <h1>SUSS Shuttle App (Prototype)</h1>
+    <p>Time-efficient, comfortable, stress-free rides from MRT interchanges to SUSS before class.</p>
+  </header>
+
   <div class="container">
-    <h1>SUSS Shuttle Booking (Prototype)</h1>
-        <p>
-      Prototype for an autonomous bus shuttle from MRT interchanges 
-      to SUSS <strong>before class</strong>. Focus is on reducing stress and travel time 
-      on the way to campus.
-    </p>
-
-
-    <div class="section">
-      <h2>1. Student details</h2>
-      <label>
-        SUSS Student ID (for demo, any text is allowed):
-        <input id="studentIdInput" type="text" placeholder="e.g. S1234567A" />
-      </label>
-      <p class="info-box">
-        Anti-abuse rule: only one active booking per student ID. Repeated no-shows (3+) will block further bookings.
-      </p>
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="tab-button active" data-tab="book">Book Shuttle</button>
+      <button class="tab-button" data-tab="trips">My trips & rules</button>
+      <button class="tab-button" data-tab="about">About & amenities</button>
     </div>
 
-    <div class="section">
-      <h2>2. Choose shuttle</h2>
-      <label>
-        Pick-up location:
-        <select id="locationSelect">
-          <option value="jurong-east">Jurong East MRT (direct to SUSS)</option>
-          <option value="bukit-panjang">Bukit Panjang MRT (LRT alternative)</option>
-          <option value="tanah-merah">Tanah Merah MRT (East)</option>
-          <option value="paya-lebar">Paya Lebar MRT (East)</option>
-        </select>
-      </label>
-
-      <label>
-        Time slot:
-        <select id="timeSelect">
-          <option value="08:30">08:30 (morning classes)</option>
-          <option value="12:00">12:00 (midday classes)</option>
-          <option value="15:30">15:30 (afternoon classes)</option>
-          <option value="19:00">19:00 (evening classes)</option>
-        </select>
-      </label>
-
-      <p id="capacityText"><strong>Capacity:</strong> 40 seats total, 0 taken, 40 remaining.</p>
-
-      <button id="bookButton">Book seat</button>
-      <div id="message" class="message" style="display:none;"></div>
-
-      <p class="info-box">
-        The app shows capacity so students can choose a less crowded bus. Once full, no more bookings are allowed so everyone sits.
-      </p>
-    </div>
-
-    <div class="section">
-      <h2>3. Your booking & QR code</h2>
-      <div id="bookingArea">
+    <!-- Tab 1: Booking -->
+    <div id="tab-book" class="tab-content active">
+      <div class="section">
+        <h2>1. Student details</h2>
+        <label>
+          SUSS Student ID (for demo, any text is allowed):
+          <input id="studentIdInput" type="text" placeholder="e.g. S1234567A" />
+        </label>
         <p class="info-box">
-          After booking, your active booking will appear here with a generated QR code. 
-          In the real system, you would scan this at the bus door to board.
+          Anti-abuse rule: only one active booking per student ID at any time. Repeated no-shows (3+) will block further bookings.
+        </p>
+      </div>
+
+      <div class="section">
+        <h2>2. Choose shuttle (to SUSS)</h2>
+        <label>
+          Pick-up location:
+          <select id="locationSelect">
+            <option value="jurong-east">Jurong East MRT (direct to SUSS)</option>
+            <option value="bukit-panjang">Bukit Panjang MRT (LRT alternative)</option>
+            <option value="tanah-merah">Tanah Merah MRT (East)</option>
+            <option value="paya-lebar">Paya Lebar MRT (East)</option>
+          </select>
+        </label>
+
+        <label>
+          Time slot:
+          <select id="timeSelect">
+            <option value="08:30">08:30 (morning classes)</option>
+            <option value="12:00">12:00 (midday classes)</option>
+            <option value="15:30">15:30 (afternoon classes)</option>
+            <option value="19:00">19:00 (evening classes)</option>
+          </select>
+        </label>
+
+        <p id="capacityText"><strong>Capacity:</strong> 40 seats total, 0 taken, 40 remaining.</p>
+
+        <button id="bookButton" class="primary">Book seat</button>
+        <div id="message" class="message" style="display:none;"></div>
+
+        <p class="info-box">
+          The app shows capacity in real time so students can choose a less crowded bus. Once full, no more bookings are allowed so everyone has a seat.
+        </p>
+      </div>
+
+      <div class="section">
+        <h2>3. Your booking & QR code</h2>
+        <div id="bookingArea">
+          <p class="info-box">
+            After booking, your active booking will appear here with a generated QR code.
+            In the real system, you would scan this at the bus door to board.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Trips & rules -->
+    <div id="tab-trips" class="tab-content">
+      <div class="section">
+        <h2>My trips (demo explanation)</h2>
+        <p class="info-box">
+          In a full version, this tab would show your upcoming and past trips:
+        </p>
+        <ul>
+          <li><strong>Upcoming trips:</strong> your next booked shuttle, with QR code and “Add to calendar”.</li>
+          <li><strong>Past trips:</strong> history of rides taken in the last 30 days.</li>
+          <li><strong>Missed trips:</strong> rides you booked but did not check in (counted as no-shows).</li>
+        </ul>
+        <p class="info-box">
+          For this prototype, the logic is simplified and only tracks one active booking in the “Book Shuttle” tab, but this tab explains how the data would be organised.
+        </p>
+      </div>
+
+      <div class="section">
+        <h2>Fairness & anti-abuse rules</h2>
+        <ul>
+          <li>Only SUSS IDs can book (in real app, verified with SUSS login).</li>
+          <li>One active booking per student ID at any time (prevents blocking multiple buses).</li>
+          <li>Seats limited to 40 per bus; once full, further bookings are blocked.</li>
+          <li>Bookings open 2 days before each trip at 9pm and close when full (concept).</li>
+          <li>No-show: if you do not check in at the bus, your booking is marked “missed”.</li>
+          <li>After 3 no-shows, your account is temporarily blocked for new bookings.</li>
+        </ul>
+        <p class="info-box">
+          These rules make the shuttle fair, predictable, and prevent students from other schools from abusing the system.
         </p>
       </div>
     </div>
 
-    <div class="section">
-      <h2>Bus amenities (concept)</h2>
-      <ul>
-        <li>Amenities kit: shared cushions, tissues</li>
-        <li>Shades / dimming windows or curtains</li>
-        <li>Digital clock for time awareness</li>
-        <li>Free Wi-Fi for study on the go</li>
-        <li>Complimentary bottled water and light snacks</li>
-        <li>Overhead compartment for bulky bags</li>
-        <li>Foldable tables (airplane-style)</li>
-        <li>USB charging ports at every seat</li>
-      </ul>
-      <p class="info-box">
-        These features support comfort and stress reduction: students can rest, study, and arrive at SUSS in a good mood.
-      </p>
-    </div>
+    <!-- Tab 3: About & amenities -->
+    <div id="tab-about" class="tab-content">
+      <div class="section">
+        <h2>Why this shuttle exists</h2>
+        <p>
+          Isabelle, a SUSS student, needs a direct shuttle that is time-efficient, comfortable, and stress-free so she can arrive for classes on time and in a good mood.
+        </p>
+        <ul>
+          <li>Direct routes from selected MRT interchanges to SUSS reduce line changes and bottlenecks at busy stations like Clementi and King Albert Park.</li>
+          <li>Fixed timings aligned to common SUSS class slots (08:30, 12:00, 15:30, 19:00).</li>
+          <li>Capacity control ensures everyone has a seat; no standing allowed.</li>
+        </ul>
+      </div>
 
-    <div class="section">
-      <h2>Anti-abuse & fairness features (prototype logic)</h2>
-      <ul>
-        <li>Only SUSS IDs can book (in real app, verified with SUSS login).</li>
-        <li>One active booking per student ID at any time.</li>
-        <li>Seats are limited to 40 per bus; no standing allowed.</li>
-        <li>Booking opens 2 days before the trip at 9pm and closes once full (conceptual, described here).</li>
-        <li>No-show counter: if you don’t check in at the bus, you get one no-show.</li>
-        <li>3 no-shows = temporary block from booking. You must contact admin to reset.</li>
-      </ul>
-      <p class="info-box">
-        This ensures students cannot spam-book seats and prevents non-SUSS students from boarding.
-      </p>
+      <div class="section">
+        <h2>Bus amenities (comfort features)</h2>
+        <ul>
+          <li>Amenities kit: shared cushions and tissues placed near seats.</li>
+          <li>Shades or dimming windows / curtains to reduce glare and eye strain.</li>
+          <li>Digital clock visible to both driver and students.</li>
+          <li>Free Wi-Fi for students who want to study or do work.</li>
+          <li>Complimentary bottled water and light snacks near the entrance.</li>
+          <li>Overhead compartments for bulky bags, freeing legroom.</li>
+          <li>Foldable tables (airplane-style) for laptops and notes.</li>
+          <li>USB charging ports beside seats for devices.</li>
+        </ul>
+        <p class="info-box">
+          These features support the user need: students can rest, work, and arrive at SUSS less stressed and more prepared for class.
+        </p>
+      </div>
     </div>
   </div>
 
   <script>
+    // Tab logic
+    const tabButtons = document.querySelectorAll(".tab-button");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.getAttribute("data-tab");
+
+        tabButtons.forEach((b) => b.classList.remove("active"));
+        tabContents.forEach((c) => c.classList.remove("active"));
+
+        btn.classList.add("active");
+        document.getElementById("tab-" + target).classList.add("active");
+      });
+    });
+
+    // Booking logic (same as before, slightly reorganised)
     const MAX_SEATS = 40;
-    const bookings = []; // list of all bookings
-    const noShowCount = {}; // track no-shows per student (concept)
-    let capacityByKey = {}; // key: location|time -> number taken
+    const bookings = [];
+    const noShowCount = {};
+    let capacityByKey = {};
 
     const studentIdInput = document.getElementById("studentIdInput");
     const locationSelect = document.getElementById("locationSelect");
@@ -227,7 +340,7 @@
         <p><strong>QR Code (demo):</strong></p>
         <div class="qr-box">${active.qrCode}</div>
         <br/>
-        <button id="checkInBtn">Simulate check-in (QR scan)</button>
+        <button id="checkInBtn" class="primary">Simulate check-in (QR scan)</button>
         <button id="cancelBtn" style="margin-left:8px;">Cancel booking</button>
         <p class="info-box">
           Check-in represents scanning your QR code at the bus door. Not checking in repeatedly is treated as a no-show.
