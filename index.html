@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SUSS Shuttle Booking Prototype</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      margin-top: 0;
+    }
+    .section {
+      border: 1px solid #ddd;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      background: #fafafa;
+    }
+    label {
+      display: block;
+      margin-top: 8px;
+    }
+    select, input, button {
+      margin-top: 4px;
+      padding: 6px;
+      font-size: 14px;
+    }
+    button {
+      cursor: pointer;
+      background: #0066ff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+    }
+    button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    .message {
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 4px;
+      background: #e8f4ff;
+    }
+    .booking-card {
+      border: 1px solid #ccc;
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+      background: #ffffff;
+    }
+    .qr-box {
+      font-family: monospace;
+      background: #222;
+      color: #0f0;
+      padding: 4px 8px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .info-box {
+      font-size: 13px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SUSS Shuttle Booking (Prototype)</h1>
+    <p>
+      Prototype for an autonomous bus shuttle from Jurong East / Bukit Panjang / East-side MRTs 
+      to SUSS. Time-efficient, comfortable, and stress-free.
+    </p>
+
+    <div class="section">
+      <h2>1. Student details</h2>
+      <label>
+        SUSS Student ID (for demo, any text is allowed):
+        <input id="studentIdInput" type="text" placeholder="e.g. S1234567A" />
+      </label>
+      <p class="info-box">
+        Anti-abuse rule: only one active booking per student ID. Repeated no-shows (3+) will block further bookings.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>2. Choose shuttle</h2>
+      <label>
+        Pick-up location:
+        <select id="locationSelect">
+          <option value="jurong-east">Jurong East MRT (direct to SUSS)</option>
+          <option value="bukit-panjang">Bukit Panjang MRT (LRT alternative)</option>
+          <option value="tanah-merah">Tanah Merah MRT (East)</option>
+          <option value="paya-lebar">Paya Lebar MRT (East)</option>
+        </select>
+      </label>
+
+      <label>
+        Time slot:
+        <select id="timeSelect">
+          <option value="08:30">08:30 (morning classes)</option>
+          <option value="12:00">12:00 (midday classes)</option>
+          <option value="15:30">15:30 (afternoon classes)</option>
+          <option value="19:00">19:00 (evening classes)</option>
+        </select>
+      </label>
+
+      <p id="capacityText"><strong>Capacity:</strong> 40 seats total, 0 taken, 40 remaining.</p>
+
+      <button id="bookButton">Book seat</button>
+      <div id="message" class="message" style="display:none;"></div>
+
+      <p class="info-box">
+        The app shows capacity so students can choose a less crowded bus. Once full, no more bookings are allowed so everyone sits.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>3. Your booking & QR code</h2>
+      <div id="bookingArea">
+        <p class="info-box">
+          After booking, your active booking will appear here with a generated QR code. 
+          In the real system, you would scan this at the bus door to board.
+        </p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Bus amenities (concept)</h2>
+      <ul>
+        <li>Amenities kit: shared cushions, tissues</li>
+        <li>Shades / dimming windows or curtains</li>
+        <li>Digital clock for time awareness</li>
+        <li>Free Wi-Fi for study on the go</li>
+        <li>Complimentary bottled water and light snacks</li>
+        <li>Overhead compartment for bulky bags</li>
+        <li>Foldable tables (airplane-style)</li>
+        <li>USB charging ports at every seat</li>
+      </ul>
+      <p class="info-box">
+        These features support comfort and stress reduction: students can rest, study, and arrive at SUSS in a good mood.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Anti-abuse & fairness features (prototype logic)</h2>
+      <ul>
+        <li>Only SUSS IDs can book (in real app, verified with SUSS login).</li>
+        <li>One active booking per student ID at any time.</li>
+        <li>Seats are limited to 40 per bus; no standing allowed.</li>
+        <li>Booking opens 2 days before the trip at 9pm and closes once full (conceptual, described here).</li>
+        <li>No-show counter: if you don’t check in at the bus, you get one no-show.</li>
+        <li>3 no-shows = temporary block from booking. You must contact admin to reset.</li>
+      </ul>
+      <p class="info-box">
+        This ensures students cannot spam-book seats and prevents non-SUSS students from boarding.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const MAX_SEATS = 40;
+    const bookings = []; // list of all bookings
+    const noShowCount = {}; // track no-shows per student (concept)
+    let capacityByKey = {}; // key: location|time -> number taken
+
+    const studentIdInput = document.getElementById("studentIdInput");
+    const locationSelect = document.getElementById("locationSelect");
+    const timeSelect = document.getElementById("timeSelect");
+    const capacityText = document.getElementById("capacityText");
+    const bookButton = document.getElementById("bookButton");
+    const messageBox = document.getElementById("message");
+    const bookingArea = document.getElementById("bookingArea");
+
+    function keyFor(loc, time) {
+      return loc + "|" + time;
+    }
+
+    function updateCapacityText() {
+      const loc = locationSelect.value;
+      const time = timeSelect.value;
+      const key = keyFor(loc, time);
+      const taken = capacityByKey[key] || 0;
+      const remaining = MAX_SEATS - taken;
+      capacityText.innerHTML =
+        "<strong>Capacity:</strong> 40 seats total, " +
+        taken +
+        " taken, " +
+        remaining +
+        " remaining.";
+    }
+
+    function showMessage(text) {
+      messageBox.style.display = "block";
+      messageBox.textContent = text;
+    }
+
+    function renderBookingForStudent(studentId) {
+      bookingArea.innerHTML = "";
+      const active = bookings.find(
+        (b) => b.studentId === studentId && !b.cancelled
+      );
+      if (!active) {
+        bookingArea.innerHTML =
+          '<p class="info-box">No active booking. Enter your student ID and book a seat.</p>';
+        return;
+      }
+
+      const div = document.createElement("div");
+      div.className = "booking-card";
+      div.innerHTML = `
+        <p><strong>Student ID:</strong> ${active.studentId}</p>
+        <p><strong>Location:</strong> ${active.locationLabel}</p>
+        <p><strong>Time:</strong> ${active.time}</p>
+        <p><strong>QR Code (demo):</strong></p>
+        <div class="qr-box">${active.qrCode}</div>
+        <br/>
+        <button id="checkInBtn">Simulate check-in (QR scan)</button>
+        <button id="cancelBtn" style="margin-left:8px;">Cancel booking</button>
+        <p class="info-box">
+          Check-in represents scanning your QR code at the bus door. Not checking in repeatedly is treated as a no-show.
+        </p>
+      `;
+      bookingArea.appendChild(div);
+
+      document.getElementById("checkInBtn").onclick = function () {
+        active.checkedIn = true;
+        showMessage("Checked in successfully. Enjoy your comfortable ride!");
+      };
+
+      document.getElementById("cancelBtn").onclick = function () {
+        active.cancelled = true;
+        const key = keyFor(active.location, active.time);
+        capacityByKey[key] = (capacityByKey[key] || 0) - 1;
+        updateCapacityText();
+        showMessage("Booking cancelled to free up seats for others.");
+        renderBookingForStudent(studentId);
+      };
+    }
+
+    bookButton.onclick = function () {
+      const studentId = studentIdInput.value.trim();
+      if (!studentId) {
+        showMessage("Please enter your SUSS Student ID.");
+        return;
+      }
+
+      const ns = noShowCount[studentId] || 0;
+      if (ns >= 3) {
+        showMessage(
+          "You have 3 or more no-shows. Booking is temporarily blocked. Please contact shuttle admin."
+        );
+        return;
+      }
+
+      const existing = bookings.find(
+        (b) => b.studentId === studentId && !b.cancelled
+      );
+      if (existing) {
+        showMessage("You already have an active booking. Cancel it before booking another.");
+        renderBookingForStudent(studentId);
+        return;
+      }
+
+      const loc = locationSelect.value;
+      const time = timeSelect.value;
+      const key = keyFor(loc, time);
+      const taken = capacityByKey[key] || 0;
+      if (taken >= MAX_SEATS) {
+        showMessage("This bus is full. Please pick another time or location.");
+        updateCapacityText();
+        return;
+      }
+
+      const locationLabel =
+        locationSelect.options[locationSelect.selectedIndex].text;
+
+      const newBooking = {
+        studentId,
+        location: loc,
+        locationLabel,
+        time,
+        qrCode: "SUSS-" + studentId + "-" + loc + "-" + time,
+        checkedIn: false,
+        cancelled: false,
+      };
+      bookings.push(newBooking);
+      capacityByKey[key] = taken + 1;
+      updateCapacityText();
+      showMessage("Booking successful! Your QR code is shown below.");
+      renderBookingForStudent(studentId);
+    };
+
+    studentIdInput.addEventListener("input", function () {
+      const studentId = studentIdInput.value.trim();
+      if (studentId) {
+        renderBookingForStudent(studentId);
+      } else {
+        bookingArea.innerHTML =
+          '<p class="info-box">Enter your Student ID to see your booking.</p>';
+      }
+    });
+
+    locationSelect.addEventListener("change", updateCapacityText);
+    timeSelect.addEventListener("change", updateCapacityText);
+    updateCapacityText();
+  </script>
+</body>
+</html>
