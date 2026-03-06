@@ -147,12 +147,13 @@
 
     <!-- Tab 1: Booking -->
     <div id="tab-book" class="tab-content active">
-            <div class="section">
+      <div class="section">
         <h2>🚌 Today at a glance</h2>
         <p class="info-box" id="todaySummary">
           No shuttle booked yet. Enter your Student ID and book a seat to see your next trip here.
         </p>
       </div>
+
       <div class="section">
         <h2>👤 1. Student details</h2>
         <label>
@@ -187,12 +188,8 @@
         </label>
 
         <p id="capacityText"><strong>Capacity:</strong> 40 seats total, 0 taken, 40 remaining.</p>
-                <div style="margin-top:8px;">
-                            <p class="info-box" id="capacityHint">
-            Bus is currently empty. Plenty of seats available.
-          </p>
-        </div>
 
+        <div style="margin-top:8px;">
           <div style="width:100%;height:10px;background:#eee;border-radius:5px;overflow:hidden;">
             <div id="capacityBar" style="height:10px;width:0%;background:#00aa55;"></div>
           </div>
@@ -200,7 +197,8 @@
             Bus is currently empty. Plenty of seats available.
           </p>
         </div>
-              <label style="display:block;margin-top:12px;">
+
+        <label style="display:block;margin-top:12px;">
           <input type="checkbox" id="acceptRulesCheckbox" />
           I have read and accept the shuttle rules in the <strong>“My trips & rules”</strong> tab.
         </label>
@@ -307,7 +305,7 @@
       });
     });
 
-    // Booking logic (same as before, slightly reorganised)
+    // Booking logic
     const MAX_SEATS = 40;
     const bookings = [];
     const noShowCount = {};
@@ -320,14 +318,13 @@
     const bookButton = document.getElementById("bookButton");
     const messageBox = document.getElementById("message");
     const bookingArea = document.getElementById("bookingArea");
-        const acceptRulesCheckbox = document.getElementById("acceptRulesCheckbox");
-
+    const acceptRulesCheckbox = document.getElementById("acceptRulesCheckbox");
 
     function keyFor(loc, time) {
       return loc + "|" + time;
     }
 
-        function updateCapacityText() {
+    function updateCapacityText() {
       const loc = locationSelect.value;
       const time = timeSelect.value;
       const key = keyFor(loc, time);
@@ -347,11 +344,11 @@
       if (bar) {
         bar.style.width = percent + "%";
         if (percent < 40) {
-          bar.style.background = "#00aa55"; // green
+          bar.style.background = "#00aa55";
         } else if (percent < 80) {
-          bar.style.background = "#ffb300"; // amber
+          bar.style.background = "#ffb300";
         } else {
-          bar.style.background = "#d32f2f"; // red
+          bar.style.background = "#d32f2f";
         }
       }
 
@@ -368,7 +365,6 @@
       }
     }
 
-
     function showMessage(text) {
       messageBox.style.display = "block";
       messageBox.textContent = text;
@@ -376,11 +372,12 @@
 
     function renderBookingForStudent(studentId) {
       bookingArea.innerHTML = "";
-            const summary = document.getElementById("todaySummary");
+      const summary = document.getElementById("todaySummary");
       const active = bookings.find(
         (b) => b.studentId === studentId && !b.cancelled
       );
-            if (!active) {
+
+      if (!active) {
         bookingArea.innerHTML =
           '<p class="info-box">No active booking. Enter your student ID and book a seat.</p>';
         if (summary) {
@@ -404,7 +401,7 @@
           Check-in represents scanning your QR code at the bus door. Not checking in repeatedly is treated as a no-show.
         </p>
       `;
-            if (summary) {
+      if (summary) {
         summary.textContent =
           "Next trip: " +
           active.locationLabel +
@@ -434,12 +431,12 @@
       if (!studentId) {
         showMessage("Please enter your SUSS Student ID.");
         return;
+      }
 
-              if (!acceptRulesCheckbox.checked) {
+      if (!acceptRulesCheckbox.checked) {
         showMessage("Please read and accept the shuttle rules before booking.");
         return;
       }
-
 
       const ns = noShowCount[studentId] || 0;
       if (ns >= 3) {
