@@ -12,10 +12,12 @@
     }
 
     .app-header {
-      background: #0044aa;
+      background: linear-gradient(90deg, #003c8f, #2563eb);
       color: #fff;
       padding: 16px 24px;
+      box-shadow: 0 2px 6px rgba(15,23,42,0.25);
     }
+
     .app-header h1 {
       margin: 0 0 4px 0;
       font-size: 22px;
@@ -147,7 +149,7 @@
 </head>
 <body>
   <header class="app-header">
-    <h1>SUSS Shuttle App</h1>
+    <h1>🚌 SUSS Shuttle App</h1>
     <p>Time-efficient, comfortable, stress-free rides from MRT interchanges to SUSS before class.</p>
   </header>
 
@@ -178,8 +180,12 @@
       <div class="section">
         <h2>👤 1. Student details</h2>
         <label>
-          SUSS Student ID (SUSS Student ID (prototype uses sample IDs; real app would verify with SUSS login):
-):
+        <label>
+          SUSS Student ID (real app would verify with SUSS login):
+          <input id="studentIdInput" type="text" placeholder="e.g. S1234567A" />
+        </label>
+
+
           <input id="studentIdInput" type="text" placeholder="e.g. S1234567A" />
         </label>
         <p class="info-box">
@@ -488,16 +494,6 @@
         };
       }
 
-
-      document.getElementById("cancelBtn").onclick = function () {
-        active.cancelled = true;
-        const key = keyFor(active.location, active.time);
-        capacityByKey[key] = (capacityByKey[key] || 0) - 1;
-        updateCapacityText();
-        showMessage("Booking cancelled to free up seats for others.");
-        renderBookingForStudent(studentId);
-      };
-    }
 
     bookButton.onclick = function () {
       const studentId = studentIdInput.value.trim();
