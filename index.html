@@ -70,12 +70,13 @@
     }
 
     .section {
-      border: 1px solid #ddd;
-      padding: 12px;
-      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      padding: 16px;
+      border-radius: 8px;
       margin-bottom: 16px;
-      background: #fafafa;
+      background: #fdfdfd;
     }
+
     h2 {
       margin-top: 0;
     }
@@ -147,13 +148,13 @@
     <!-- Tab 1: Booking -->
     <div id="tab-book" class="tab-content active">
             <div class="section">
-        <h2>Today at a glance</h2>
+        <h2>🚌 Today at a glance</h2>
         <p class="info-box" id="todaySummary">
           No shuttle booked yet. Enter your Student ID and book a seat to see your next trip here.
         </p>
       </div>
       <div class="section">
-        <h2>1. Student details</h2>
+        <h2>👤 1. Student details</h2>
         <label>
           SUSS Student ID (for demo, any text is allowed):
           <input id="studentIdInput" type="text" placeholder="e.g. S1234567A" />
@@ -164,7 +165,7 @@
       </div>
 
       <div class="section">
-        <h2>2. Choose shuttle (to SUSS)</h2>
+        <h2>🕒 2. Choose shuttle (to SUSS)</h2>
         <label>
           Pick-up location:
           <select id="locationSelect">
@@ -186,6 +187,23 @@
         </label>
 
         <p id="capacityText"><strong>Capacity:</strong> 40 seats total, 0 taken, 40 remaining.</p>
+                <div style="margin-top:8px;">
+                            <p class="info-box" id="capacityHint">
+            Bus is currently empty. Plenty of seats available.
+          </p>
+        </div>
+
+          <div style="width:100%;height:10px;background:#eee;border-radius:5px;overflow:hidden;">
+            <div id="capacityBar" style="height:10px;width:0%;background:#00aa55;"></div>
+          </div>
+          <p class="info-box" id="capacityHint">
+            Bus is currently empty. Plenty of seats available.
+          </p>
+        </div>
+              <label style="display:block;margin-top:12px;">
+          <input type="checkbox" id="acceptRulesCheckbox" />
+          I have read and accept the shuttle rules in the <strong>“My trips & rules”</strong> tab.
+        </label>
 
         <button id="bookButton" class="primary">Book seat</button>
         <div id="message" class="message" style="display:none;"></div>
@@ -196,7 +214,7 @@
       </div>
 
       <div class="section">
-        <h2>3. Your booking & QR code</h2>
+        <h2>📲 3. Your booking & QR code</h2>
         <div id="bookingArea">
           <p class="info-box">
             After booking, your active booking will appear here with a generated QR code.
@@ -209,7 +227,7 @@
     <!-- Tab 2: Trips & rules -->
     <div id="tab-trips" class="tab-content">
       <div class="section">
-        <h2>My trips (demo explanation)</h2>
+        <h2>📑 My trips (demo explanation)</h2>
         <p class="info-box">
           In a full version, this tab would show your upcoming and past trips:
         </p>
@@ -224,7 +242,7 @@
       </div>
 
       <div class="section">
-        <h2>Fairness & anti-abuse rules</h2>
+        <h2>⚖️ Fairness & anti-abuse rules</h2>
         <ul>
           <li>Only SUSS IDs can book (in real app, verified with SUSS login).</li>
           <li>One active booking per student ID at any time (prevents blocking multiple buses).</li>
@@ -242,7 +260,7 @@
     <!-- Tab 3: About & amenities -->
     <div id="tab-about" class="tab-content">
       <div class="section">
-        <h2>Why this shuttle exists</h2>
+        <h2>🎯 Why this shuttle exists</h2>
         <p>
           Isabelle, a SUSS student, needs a direct shuttle that is time-efficient, comfortable, and stress-free so she can arrive for classes on time and in a good mood.
         </p>
@@ -254,7 +272,7 @@
       </div>
 
       <div class="section">
-        <h2>Bus amenities (comfort features)</h2>
+        <h2>✨ Bus amenities (comfort features)</h2>
         <ul>
           <li>Amenities kit: shared cushions and tissues placed near seats.</li>
           <li>Shades or dimming windows / curtains to reduce glare and eye strain.</li>
@@ -302,12 +320,14 @@
     const bookButton = document.getElementById("bookButton");
     const messageBox = document.getElementById("message");
     const bookingArea = document.getElementById("bookingArea");
+        const acceptRulesCheckbox = document.getElementById("acceptRulesCheckbox");
+
 
     function keyFor(loc, time) {
       return loc + "|" + time;
     }
 
-    function updateCapacityText() {
+        function updateCapacityText() {
       const loc = locationSelect.value;
       const time = timeSelect.value;
       const key = keyFor(loc, time);
@@ -319,7 +339,35 @@
         " taken, " +
         remaining +
         " remaining.";
+
+      const bar = document.getElementById("capacityBar");
+      const hint = document.getElementById("capacityHint");
+      const percent = (taken / MAX_SEATS) * 100;
+
+      if (bar) {
+        bar.style.width = percent + "%";
+        if (percent < 40) {
+          bar.style.background = "#00aa55"; // green
+        } else if (percent < 80) {
+          bar.style.background = "#ffb300"; // amber
+        } else {
+          bar.style.background = "#d32f2f"; // red
+        }
+      }
+
+      if (hint) {
+        if (remaining === MAX_SEATS) {
+          hint.textContent = "Bus is currently empty. Plenty of seats available.";
+        } else if (remaining > 10) {
+          hint.textContent = "Bus is moderately filled. You can still choose this comfortably.";
+        } else if (remaining > 0) {
+          hint.textContent = "Bus is almost full. Consider another slot if you want a quieter ride.";
+        } else {
+          hint.textContent = "Bus is full. No more seats available.";
+        }
+      }
     }
+
 
     function showMessage(text) {
       messageBox.style.display = "block";
@@ -386,7 +434,12 @@
       if (!studentId) {
         showMessage("Please enter your SUSS Student ID.");
         return;
+
+              if (!acceptRulesCheckbox.checked) {
+        showMessage("Please read and accept the shuttle rules before booking.");
+        return;
       }
+
 
       const ns = noShowCount[studentId] || 0;
       if (ns >= 3) {
