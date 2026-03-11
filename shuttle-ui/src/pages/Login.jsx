@@ -23,7 +23,7 @@ function Login({ onLogin }) {
         <div className="login-image-wrap">
           <img
             className="login-image"
-            src={`${import.meta.env.BASE_URL}Sample 2.6_Bus exterior.jpg`}
+            src={`${import.meta.env.BASE_URL}bus-exterior.jpg`}
             alt="SUSS shuttle bus"
           />
         </div>

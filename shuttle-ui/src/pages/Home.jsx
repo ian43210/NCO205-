@@ -14,7 +14,7 @@ function Home() {
         <div className="home-hero-image-wrap">
           <img
             className="home-hero-image"
-            src={`${import.meta.env.BASE_URL}Sample 2.6_Bus exterior.jpg`}
+            src={`${import.meta.env.BASE_URL}bus-exterior.jpg`}
             alt="SUSS shuttle bus exterior"
           />
         </div>
@@ -35,7 +35,7 @@ function Home() {
           <article className="home-feature-card">
             <img
               className="home-feature-image"
-              src={`${import.meta.env.BASE_URL}Sample 2.2_Bus WIFI and clock amenities.jpg`}
+              src={`${import.meta.env.BASE_URL}bus-wifi-clock.jpg`}
               alt="Bus WiFi and digital clock amenities"
             />
             <h4>Wi-Fi and digital clock</h4>
@@ -48,7 +48,7 @@ function Home() {
           <article className="home-feature-card">
             <img
               className="home-feature-image"
-              src={`${import.meta.env.BASE_URL}Sample 2.3_Seats ergonomic design and overhead compartment.jpg`}
+              src={`${import.meta.env.BASE_URL}bus-seats-storage.jpg`}
               alt="Ergonomic seats and overhead compartment"
             />
             <h4>Comfortable seats and storage</h4>
@@ -61,7 +61,7 @@ function Home() {
           <article className="home-feature-card">
             <img
               className="home-feature-image"
-              src={`${import.meta.env.BASE_URL}Sample 2.5_Complimentary snacks and table.jpg`}
+              src={`${import.meta.env.BASE_URL}bus-snacks-table.jpg`}
               alt="Complimentary snacks and foldable table"
             />
             <h4>Refreshments and practical support</h4>
